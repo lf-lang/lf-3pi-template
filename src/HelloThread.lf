@@ -1,0 +1,37 @@
+target C {
+    platform: "Rp2040",
+    threading: true,
+    workers: 2,
+    tracing: false,
+}
+
+/**
+* Multicore test that attempts to concurrently
+* print from both cores using parallel reactors
+* 
+* @author Abhi Gundrala
+**/
+
+preamble {=
+    #include <pico/stdlib.h>
+    #include <stdio.h>
+=}
+
+reactor Hello {
+    input trig:bool;
+    reaction(trig) {=
+        printf("Hello, from core %d", 
+            get_core_num()); 
+    =}
+}
+
+main reactor {
+    timer t1(0, 100 msec);
+    hell0 = new Hello();
+    hell1 = new Hello();
+    reaction(t1) -> hell0.trig, hell1.trig {=
+        lf_set(hell0.trig, true); 
+        lf_set(hell1.trig, true); 
+    =}
+
+}

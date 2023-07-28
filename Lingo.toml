@@ -1,0 +1,16 @@
+[package]
+name = "lf-pico-template"
+version = "0.1.0"
+authors = ["gundralaa@berkeley.edu"]
+description = "Lingua Franca project template for rp2040 bare metal target platform"
+
+[properties]
+
+[[app]]
+name = "HelloPico"
+main_reactor = "./src/HelloPico.lf"
+target = "C"
+platform = "RP2040"
+
+[app.dependencies]
+[app.properties]
