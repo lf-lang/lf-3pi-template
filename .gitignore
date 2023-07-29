@@ -3,3 +3,6 @@ bin/
 target/
 src-gen/
 include/
+
+# MacOS junk
+.DS_Store
