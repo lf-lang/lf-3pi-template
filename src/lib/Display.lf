@@ -1,0 +1,63 @@
+/**
+ * @brief Library reactor for the LCD display on the the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * When this reactor receives a string any input, it updates the appropriate line on the LCD display.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+ target C {
+    platform: "RP2040",
+    threading: false,
+    files: ["../../robot-lib/"],                      // Needed to find display.h
+    cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find display.h
+}
+
+preamble {=
+    #include <pico/stdlib.h>
+    #include <display.h>        // Do not use "display.h". Doesn't work.
+=}
+
+reactor Display {
+  preamble {=
+    static bool _pololu_robot_display_initialized = false;
+  =}
+  // inputs 
+  input line0:string;
+  input line1:string;
+  input line2:string;
+  input line3:string;
+  // buffer update action
+  reaction(startup) {=
+    // Initialize only once if there are multiple instances.
+    if (!_pololu_robot_display_initialized) {
+      _pololu_robot_display_initialized = true;
+      display_init();
+      display_set_font(font_8x16);
+      // clear the frame buffer
+      display_fill(0);
+    }
+  =}
+  reaction(line0, line1, line2, line3) {=
+    if (line0->is_present) {
+      // Clear the line.
+      display_fill_rect(0, 0, DISPLAY_WIDTH, 16, 0);
+      display_text(line0->value, 0, 0, COLOR_WHITE);
+    }
+    if (line1->is_present) {
+      // Clear the line.
+      display_fill_rect(0, 16, DISPLAY_WIDTH, 16, 0);
+      display_text(line1->value, 0, 16, COLOR_WHITE);
+    }
+    if (line2->is_present) {
+      // Clear the line.
+      display_fill_rect(0, 32, DISPLAY_WIDTH, 16, 0);
+      display_text(line2->value, 0, 32, COLOR_WHITE);
+    }
+    if (line3->is_present) {
+      // Clear the line.
+      display_fill_rect(0, 48, DISPLAY_WIDTH, 16, 0);
+      display_text(line3->value, 0, 48, COLOR_WHITE);
+    }
+    // display buffer
+    display_show();
+  =}
+}

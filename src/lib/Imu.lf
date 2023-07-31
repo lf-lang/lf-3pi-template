@@ -1,0 +1,113 @@
+/**
+ * Library reactors for the IMU on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * Note that these reactors rely on the fact that they are executed in an unthreaded
+ * runtime. To adapt them for a threaded runtime, they will need to use mutual
+ * exclusion to ensure that multiple instances of the reactors are not simultaneously
+ * accessing the shared hardware resource.
+ * 
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+target C {
+  platform: "RP2040", 
+  threading: false,
+  files: ["../../robot-lib/"],                      // Needed to find imu.h
+  cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find imu.h
+}
+
+preamble {=
+  #include <pico/stdlib.h>
+  #include <imu.h>
+=}
+
+/**
+ * When triggered by a true-valued input, sample the accelerometer
+ * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * The accelerometer is provided by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
+ * The outputs give acceleration in <i>g</i>'s with a range of -2 to +2 <i>g</i>
+ * and a sensitivity of approximately 0.061 <i>mg</i>'s.
+ */
+reactor Accelerometer {
+
+  preamble {=
+    // Static global IMU instance struct.
+    static imu_inst_t imu_instance;
+    // Boolean to ensure the IMU instance is initialized only once.
+    static bool _pololu_robot_imu_initialized = false;
+  =}
+
+  input trigger:bool;
+  
+  output x:float;
+  output y:float;
+  output z:float;
+
+  reaction(startup) {=
+    if (!_pololu_robot_imu_initialized) {
+      _pololu_robot_imu_initialized = true;
+      imu_init(&imu_instance);
+    }
+  =}
+  
+  reaction(trigger) -> x, y, z {= 
+    axes_data_t acc_data;
+    imu_read_acc(&imu_instance, &acc_data);
+
+    lf_set(x, acc_data.x);
+    lf_set(y, acc_data.y);
+    lf_set(z, acc_data.z);   
+  =}
+}
+
+// trapazoidal integration
+reactor GyroTrap(period:time = 100 ms) {
+  timer t1(period, period);
+  
+  output x:float;
+  output y:float;
+  output z:float;
+  // x,y,z
+  reset state prev_deg_x:float = 0;
+  reset state prev_deg_y:float = 0;
+  reset state prev_deg_z:float = 0;
+  reset state prev_vel_x:float = 0;
+  reset state prev_vel_y:float = 0;
+  reset state prev_vel_z:float = 0;
+
+  reaction(startup) {=
+    if (!_pololu_robot_imu_initialized) {
+      _pololu_robot_imu_initialized = true;
+      imu_init(&imu_instance);
+    }
+  =}
+
+  reaction(reset) {=
+    // reset
+    self->prev_deg_x = 0.0;
+    self->prev_deg_y = 0.0;
+    self->prev_deg_z = 0.0;
+    self->prev_vel_x = 0.0;
+    self->prev_vel_y = 0.0;
+    self->prev_vel_z = 0.0;
+  =}
+
+  // integrate gyro 
+  reaction(t1) -> x, y, z {=
+    axes_data_t gyro_data;
+    imu_read_gyro(&imu_instance, &gyro_data);
+
+    self->prev_deg_x += (gyro_data.x + self->prev_vel_x) * (self->period * 1e-9) / 2;
+    self->prev_deg_y += (gyro_data.y + self->prev_vel_y) * (self->period * 1e-9) / 2;
+    self->prev_deg_z += (gyro_data.z + self->prev_vel_z) * (self->period * 1e-9) / 2;
+    
+    self->prev_vel_x = gyro_data.x;
+    self->prev_vel_y = gyro_data.y;
+    self->prev_vel_z = gyro_data.z;
+    
+    // set to integrated value 
+    lf_set(x, self->prev_deg_x);
+    lf_set(y, self->prev_deg_y);
+    lf_set(z, self->prev_deg_z);
+  =}
+}

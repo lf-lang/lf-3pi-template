@@ -10,19 +10,6 @@ It also includes some code from the [pololu-3pi-2040-robot library](https://gith
 See the [installation instructions](https://www.lf-lang.org/lf-embedded-lab/Installation.html) to get started.
 
 
-## Setup
-This template uses nix to manage toolchains and other applications. Install [nix](https://nixos.org/download.html) first for your preferred platform. If possible, use a **multi-user** install, which will require sudo permissions. After installation, run the following to enable the experimental nix flakes feature, which helps to create more consistent builds:
-
-``` bash
-mkdir -p ~/.config/nix
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-```
-
-To launch the lf-pico shell environment, run the following in the root of the lf-pico repository. The launched shell will include the various required toolchains and applications needed for development.
-
-```bash
-nix develop
-```
 
 ## Building
 Lingua Franca applications are code generated into the target language. To both code generate and build application binaries one can either use lfc or lingo. Lingo ultimately uses lfc as a backend but provides an additional experimental interface for managing multiple application binaries builds.

@@ -1,14 +1,23 @@
 target C {
-    platform: "Rp2040",
-    threading: false
+  platform: "RP2040",
+  build-type: "Release",
+  threading: false
 }
 
-import Led from "./lib/Led.lf";
+preamble {=
+  #include <hardware/gpio.h>
+=}
 
 main reactor {
-    timer t1(0, 100 msec);
-    led = new Led();
-    reaction(t1) -> led.tog {=
-        lf_set(led.tog, true);
-    =}
+  timer t(0, 250 ms);
+  state led_on:bool = false;
+
+  reaction(startup) {=
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+  =}
+  reaction(t) {=
+    self->led_on = !self->led_on; 
+    gpio_put(PICO_DEFAULT_LED_PIN, self->led_on);
+  =}
 }
