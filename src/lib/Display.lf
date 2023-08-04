@@ -1,30 +1,29 @@
 /**
- * @brief Library reactor for the LCD display on the the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
- * When this reactor receives a string any input, it updates the appropriate line on the LCD display.
+ * @brief Library reactor for the LCD display on the the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>. When this reactor receives
+ * a string on any input, it updates the appropriate line on the LCD display.
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
- target C {
-    platform: "RP2040",
-    threading: false,
-    files: ["../../robot-lib/"],                      // Needed to find display.h
-    cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find display.h
+target C {
+  platform: "RP2040",
+  threading: false,
+  files: ["../../robot-lib/"],  // Needed to find display.h
+  cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find display.h
 }
 
 preamble {=
-    #include <pico/stdlib.h>
-    #include <display.h>        // Do not use "display.h". Doesn't work.
+  #include <pico/stdlib.h>
+  #include <display.h>        // Do not use "display.h". Doesn't work.
 =}
 
 reactor Display {
-  preamble {=
-    static bool _pololu_robot_display_initialized = false;
-  =}
-  // inputs 
-  input line0:string;
-  input line1:string;
-  input line2:string;
-  input line3:string;
+  preamble {= static bool _pololu_robot_display_initialized = false; =}
+  input line0: string  // inputs
+  input line1: string
+  input line2: string
+  input line3: string
+
   // buffer update action
   reaction(startup) {=
     // Initialize only once if there are multiple instances.
@@ -36,6 +35,7 @@ reactor Display {
       display_fill(0);
     }
   =}
+
   reaction(line0, line1, line2, line3) {=
     if (line0->is_present) {
       // Clear the line.
