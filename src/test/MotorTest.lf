@@ -1,0 +1,21 @@
+/**
+ * Simple test of the motors that rotates the robot both ways.
+ */
+ target C {
+  platform: "RP2040",
+  threading: false,
+}
+import Motors from "../lib/Motors.lf"
+
+main reactor {
+  timer t(0, 2s)
+  state right:bool = true
+  motors = new Motors()
+  reaction(t) -> motors.left_power, motors.right_power {=
+    float speed = 0.1f;
+    if (!self->right) speed = -0.1f;
+    self->right != self->right;
+    lf_set(motors.left_power, -speed);
+    lf_set(motors.right_power, speed);
+  =}
+}

@@ -1,0 +1,39 @@
+/**
+ * @brief Library reactor for driving the motors on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * The power inputs should range from -1.0 to 1.0.  Values outside this range
+ * will be clamped. Negative values indicate reverse direction.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+ target C {
+  platform: "RP2040",
+  threading: false,
+  files: ["../../robot-lib/"],  // Needed to find motors.h
+  cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find motors.h
+}
+preamble {=
+  #include <motors.h>
+=}
+reactor Motors {
+  input left_power:float
+  input right_power:float
+  reaction(startup) {=
+    motors_init(1); // 1 indicates no clock division.
+  =}
+  method set_power(power:float, forward:bool, left:bool) {=
+    power = fabsf(power);
+    if (power > 1.0f) power = 1.0f;
+    // Round down:
+    uint16_t duty_cycle = (uint16_t)(power * MAX_MOTOR_POWER);
+    motors_set_power(duty_cycle, forward, left);
+  =}
+  reaction(left_power) {=
+    bool forward = (left_power->value >= 0.0f);
+    set_power(left_power->value, forward, true);
+  =}
+  reaction(right_power) {=
+    bool forward = (right_power->value >= 0.0f);
+    set_power(right_power->value, forward, false);
+  =}
+}

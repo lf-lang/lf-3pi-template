@@ -19,7 +19,7 @@
  target C {
     platform: "RP2040",
     threading: false,
-};
+}
 
 import Accelerometer from "lib/IMU.lf"
 import Display from "lib/Display.lf"
