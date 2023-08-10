@@ -13,8 +13,12 @@ main reactor {
   motors = new Motors()
   reaction(t) -> motors.left_power, motors.right_power {=
     float speed = 0.1f;
-    if (!self->right) speed = -0.1f;
-    self->right != self->right;
+    if (!self->right) {
+      speed = -0.1f;
+      self->right = true;
+    } else {
+      self->right = false;
+    }
     lf_set(motors.left_power, -speed);
     lf_set(motors.right_power, speed);
   =}

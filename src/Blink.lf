@@ -1,4 +1,10 @@
-target C {
+/**
+ * Blink the default LED on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+ target C {
   platform: "RP2040",
   threading: false
 }

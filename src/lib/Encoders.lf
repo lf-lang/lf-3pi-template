@@ -1,3 +1,10 @@
+/**
+ * @brief Library reactors for the encoders on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * The output is the 
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
 target C {
     platform: "RP2040",
     threading: false,
@@ -16,31 +23,31 @@ preamble {=
 =}
 
 reactor Encoders {
-    timer t1(0, 10 msec);
-    output right_cnt:int; 
-    output left_cnt:int;
-    reaction(startup) {=
-        PIO pio = pio0;
-        pio_add_program(pio, &quadrature_encoder_program);
-        quadrature_encoder_program_init(pio, RIGHT_SM, RIGHT_ENCODER_AB, 0);
-        quadrature_encoder_program_init(pio, LEFT_SM, LEFT_ENCODER_AB, 0);
-    =}
-    reaction(t1) -> left_cnt, right_cnt {=
-        int32_t rcnt = quadrature_encoder_get_count(pio0, RIGHT_SM);
-        int32_t lcnt = quadrature_encoder_get_count(pio0, LEFT_SM);
-        lf_set(right_cnt, rcnt);
-        lf_set(left_cnt, lcnt);
-    =}
+  input trigger:bool
+  output right_count:uint32_t; 
+  output left_count:uint32_t;
+  reaction(startup) {=
+    PIO pio = pio0;
+    pio_add_program(pio, &quadrature_encoder_program);
+    quadrature_encoder_program_init(pio, RIGHT_SM, RIGHT_ENCODER_AB, 0);
+    quadrature_encoder_program_init(pio, LEFT_SM, LEFT_ENCODER_AB, 0);
+  =}
+  reaction(trigger) -> left_count, right_count {=
+    uint32_t rcount = quadrature_encoder_get_count(pio0, RIGHT_SM);
+    uint32_t lcount = quadrature_encoder_get_count(pio0, LEFT_SM);
+    lf_set(right_count, rcount);
+    lf_set(left_count, lcount);
+  =}
 }
 
 reactor Distance {
     output right_dist:float; // in meters
     output left_dist:float; // in meters
     e0 = new Encoders();
-    reaction(e0.right_cnt) -> right_dist {=
-        lf_set(right_dist, (right_cnt / 360) * WHEEL_DIAMETER * PI);
+    reaction(e0.right_count) -> right_dist {=
+        lf_set(right_dist, (right_count / 360) * WHEEL_DIAMETER * PI);
     =}
-    reaction(e0.left_cnt) -> left_dist {=
-        lf_set(left_dist, (left_cnt / 360) * WHEEL_DIAMETER * PI);
+    reaction(e0.left_count) -> left_dist {=
+        lf_set(left_dist, (left_count / 360) * WHEEL_DIAMETER * PI);
     =}
 }

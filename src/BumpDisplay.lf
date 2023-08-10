@@ -1,0 +1,32 @@
+/**
+ * Display messages when the bump sensors on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>
+ * are triggered.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+target C {
+    platform: "rp2040",
+    threading: false,
+}
+
+import Bump from "lib/Bump.lf"
+import Display from "lib/Display.lf"
+
+main reactor {
+    bump = new Bump();
+    disp = new Display();
+    logical action clear; 
+    reaction(bump.left) -> disp.line0, clear {=
+        lf_set(disp.line0, "Left Bumped!");
+        lf_schedule(clear, SEC(2));
+    =}
+    reaction(bump.right) -> disp.line1, clear {=
+        lf_set(disp.line1, "Right Bumped!");
+        lf_schedule(clear, SEC(2));
+    =}
+    reaction(clear) -> disp.line0, disp.line1 {=
+        lf_set(disp.line0, "");
+        lf_set(disp.line1, "");
+    =}
+}

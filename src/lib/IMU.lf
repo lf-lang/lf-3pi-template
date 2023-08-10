@@ -21,15 +21,9 @@ preamble {=
 =}
 
 /**
- * When triggered by a true-valued input, sample the accelerometer
- * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
- * The accelerometer is provided by an
- * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
- * The outputs give acceleration in <i>g</i>'s with a range of -2 to +2 <i>g</i>
- * and a sensitivity of approximately 0.061 <i>mg</i>'s.
+ * Base class for IMU reactors.
  */
-reactor Accelerometer {
-
+reactor IMUBase {
   preamble {=
     // Static global IMU instance struct.
     static imu_inst_t imu_instance;
@@ -38,7 +32,7 @@ reactor Accelerometer {
   =}
 
   input trigger:bool;
-  
+    
   output x:float;
   output y:float;
   output z:float;
@@ -49,7 +43,17 @@ reactor Accelerometer {
       imu_init(&imu_instance);
     }
   =}
-  
+}
+
+/**
+ * When triggered by an input (whose value is ignored), sample the accelerometer
+ * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * The accelerometer is provided by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
+ * The outputs give acceleration in <i>g</i>'s with a range of -2 to +2 <i>g</i>
+ * and a sensitivity of approximately 0.061 <i>mg</i>'s.
+ */
+reactor Accelerometer extends IMUBase {  
   reaction(trigger) -> x, y, z {= 
     axes_data_t acc_data;
     imu_read_acc(&imu_instance, &acc_data);
@@ -60,54 +64,66 @@ reactor Accelerometer {
   =}
 }
 
-// trapazoidal integration
-reactor GyroTrap(period:time = 100 ms) {
-  timer t1(period, period);
-  
+/**
+ * When triggered by an input (whose value is ignored), sample the gyroscope
+ * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * The gyroscope is provided by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
+ * The outputs give angular velocity in degrees per second.
+ */
+ reactor Gyro extends IMUBase {
+  reaction(trigger) -> x, y, z {=
+    axes_data_t gyro_data;
+    imu_read_gyro(&imu_instance, &gyro_data);
+    lf_set(x, gyro_data.x);
+    lf_set(y, gyro_data.y);
+    lf_set(z, gyro_data.z);
+  =}
+}
+
+/**
+ * Integrate the sequence of inputs using the trapezoidal method.
+ * The first output is always zero.  Subsequent outputs are the
+ * sum of the current and previous inputs multiplied by the time
+ * interval since the last input (in seconds) divided by two.
+ */
+reactor TrapezoidalIntegrator {
+  input in:float
+  output out:float
+  reset state s:float = 0
+  reset state prev_in:float = 0
+  reset state prev_time:time = 0s
+  reaction(in) -> out {=
+    instant_t now = lf_time_logical();
+    if (self->prev_time > SEC(0)) {
+      float interval = ((now - self->prev_time) * 1e-9);
+      self->s += (in->value + self->prev_in) * interval / 2;
+    }
+    lf_set(out, self->s);
+    self->prev_in = in->value;
+    self->prev_time = now;
+  =}
+}
+
+/**
+ * When triggered by an input (whose value is ignored), sample the gyroscope
+ * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>
+ * and integrate its output.  The output is an estimate of the angle (in degrees)
+ * of the robot relative to its angle when first triggered along each of three axes.
+ * The gyroscope is provided by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
+ */
+ reactor GyroAngle {
+  input trigger:bool;
+    
   output x:float;
   output y:float;
   output z:float;
-  // x,y,z
-  reset state prev_deg_x:float = 0;
-  reset state prev_deg_y:float = 0;
-  reset state prev_deg_z:float = 0;
-  reset state prev_vel_x:float = 0;
-  reset state prev_vel_y:float = 0;
-  reset state prev_vel_z:float = 0;
 
-  reaction(startup) {=
-    if (!_pololu_robot_imu_initialized) {
-      _pololu_robot_imu_initialized = true;
-      imu_init(&imu_instance);
-    }
-  =}
+  g = new Gyro()
+  integrators = new[3] TrapezoidalIntegrator()
 
-  reaction(reset) {=
-    // reset
-    self->prev_deg_x = 0.0;
-    self->prev_deg_y = 0.0;
-    self->prev_deg_z = 0.0;
-    self->prev_vel_x = 0.0;
-    self->prev_vel_y = 0.0;
-    self->prev_vel_z = 0.0;
-  =}
-
-  // integrate gyro 
-  reaction(t1) -> x, y, z {=
-    axes_data_t gyro_data;
-    imu_read_gyro(&imu_instance, &gyro_data);
-
-    self->prev_deg_x += (gyro_data.x + self->prev_vel_x) * (self->period * 1e-9) / 2;
-    self->prev_deg_y += (gyro_data.y + self->prev_vel_y) * (self->period * 1e-9) / 2;
-    self->prev_deg_z += (gyro_data.z + self->prev_vel_z) * (self->period * 1e-9) / 2;
-    
-    self->prev_vel_x = gyro_data.x;
-    self->prev_vel_y = gyro_data.y;
-    self->prev_vel_z = gyro_data.z;
-    
-    // set to integrated value 
-    lf_set(x, self->prev_deg_x);
-    lf_set(y, self->prev_deg_y);
-    lf_set(z, self->prev_deg_z);
-  =}
+  trigger -> g.trigger
+  g.x, g.y, g.z -> integrators.in
+  integrators.out -> x, y, z
 }

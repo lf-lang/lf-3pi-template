@@ -1,0 +1,41 @@
+/**
+ * @brief Library reactor for the bump sensors on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * When this reactor detects a bump on the left or right, it produces a
+ * true value on the output.  The period at which it periodically samples the bump
+ * sensors is a parameter.  During startup, this reactor auto-calibrates the
+ * bump sensors.  It recalibrates them each time it receives a calibrate input.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+ target C {
+    platform: "rp2040",
+    threading: false,
+}
+
+preamble {=
+    #include <ir_sensors.h>
+    // others
+=}
+
+reactor Bump(sample_period:time = 200ms) {
+    timer t1(0, sample_period);
+    input calibrate:bool;
+    output left:bool;
+    output right:bool;
+
+    reaction(startup, calibrate) {=
+        bump_sensors_calibrate();
+    =}
+    reaction(t1) -> left, right {=
+        bump_sensors_read();
+        // only is_present when pressed
+        if (bump_sensor_left_is_pressed()) {
+            lf_set(left, true);
+        }
+        if (bump_sensor_right_is_pressed()) {
+            lf_set(right, true);
+        }
+    =}
+
+}

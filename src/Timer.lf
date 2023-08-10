@@ -1,7 +1,11 @@
+/**
+ * This simple demonstration program prints logical time, physical time,
+ * and lag (physical time minus logical time) once per second.
+ */
 target C {
     platform: "Rp2040",
     threading: false,
-    timeout: 10 sec,
+    timeout: 60 sec,
 }
 
 preamble {=

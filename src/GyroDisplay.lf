@@ -1,0 +1,49 @@
+/**
+ * Display measurements from the gyroscope on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * The gyroscope is provided by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
+ * The display shows angular velocity in degrees per second.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+ target C {
+  platform: "RP2040",
+  threading: false,
+}
+
+import Display from "lib/Display.lf"
+import Gyro from "lib/IMU.lf"
+
+main reactor {
+  display = new Display()
+  gyro = new Gyro()
+
+  timer t(0, 100ms)
+
+  reaction(t) -> gyro.trigger {=
+    lf_set(gyro.trigger, true);
+  =}
+
+  reaction(startup) -> display.line0 {=
+    lf_set(display.line0, "GYRO:");
+  =}
+
+  reaction(gyro.x) -> display.line1 {=
+    static char buf[17];
+    snprintf(buf, 17, "x: %.1f", gyro.x->value);
+    lf_set(display.line1, buf);
+  =}
+
+  reaction(gyro.y) -> display.line2 {=
+    static char buf[17];
+    snprintf(buf, 17, "y: %.1f", gyro.y->value);
+    lf_set(display.line2, buf);
+  =}
+
+  reaction(gyro.z) -> display.line3 {=
+    static char buf[17];
+    snprintf(buf, 17, "z: %.1f", gyro.z->value);
+    lf_set(display.line3, buf);
+  =}
+}
