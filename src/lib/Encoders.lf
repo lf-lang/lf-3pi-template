@@ -1,7 +1,10 @@
 /**
  * @brief Library reactors for the encoders on the
  * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
- * The output is the 
+ * The output is the angle in degrees seen by the encoder.
+ * The angle increases or decreases as the motors move forward or backward.
+ * Eventually, you will get overflow and the angles will wrap around.
+ * The angles increase as the wheels rotate forward.
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
@@ -24,8 +27,8 @@ preamble {=
 
 reactor Encoders {
   input trigger:bool
-  output right_count:uint32_t; 
-  output left_count:uint32_t;
+  output right_count:int32_t; 
+  output left_count:int32_t;
   reaction(startup) {=
     PIO pio = pio0;
     pio_add_program(pio, &quadrature_encoder_program);
@@ -33,21 +36,11 @@ reactor Encoders {
     quadrature_encoder_program_init(pio, LEFT_SM, LEFT_ENCODER_AB, 0);
   =}
   reaction(trigger) -> left_count, right_count {=
-    uint32_t rcount = quadrature_encoder_get_count(pio0, RIGHT_SM);
-    uint32_t lcount = quadrature_encoder_get_count(pio0, LEFT_SM);
+    // The count return is unsigned (uint32_t), but could as well be signed.
+    // Also, the sign is reversed, where reverse increases, so we negate.
+    int32_t rcount = -(int32_t)quadrature_encoder_get_count(pio0, RIGHT_SM);
+    int32_t lcount = -(int32_t)quadrature_encoder_get_count(pio0, LEFT_SM);
     lf_set(right_count, rcount);
     lf_set(left_count, lcount);
   =}
-}
-
-reactor Distance {
-    output right_dist:float; // in meters
-    output left_dist:float; // in meters
-    e0 = new Encoders();
-    reaction(e0.right_count) -> right_dist {=
-        lf_set(right_dist, (right_count / 360) * WHEEL_DIAMETER * PI);
-    =}
-    reaction(e0.left_count) -> left_dist {=
-        lf_set(left_dist, (left_count / 360) * WHEEL_DIAMETER * PI);
-    =}
 }
