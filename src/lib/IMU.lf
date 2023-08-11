@@ -128,3 +128,17 @@ reactor TrapezoidalIntegrator {
   g.x, g.y, g.z -> integrators.in
   integrators.out -> x, y, z
 }
+/**
+ * FIXME: temporary single port reactor due to multiport bug above
+ */
+reactor GyroAngleZ {
+  input trigger:bool;
+
+  output z:float;
+  g = new Gyro()
+  integrator = new TrapezoidalIntegrator()
+
+  trigger -> g.trigger
+  g.z -> integrator.in
+  integrator.out -> z
+}
