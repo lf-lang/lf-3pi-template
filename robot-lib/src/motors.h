@@ -24,7 +24,9 @@
 void motors_init(uint8_t clock_divider);
 
 /**
- * @brief 
- * 
+ * @brief Set the power of the left or right motor moving forward or backward.
+ * @param power The power, ranging from 0 to MAX_MOTOR_POWER (clamped).
+ * @param forward True to move forward, false to move backward.
+ * @param left True to drive the left motor, false to drive the right motor.
  */
 void motors_set_power(uint16_t power, bool forward, bool left);

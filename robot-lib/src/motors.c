@@ -38,10 +38,11 @@ void motors_init(uint8_t clock_divider) {
 void motors_set_power(uint16_t power, bool forward, bool left) {
   if (power > MAX_MOTOR_POWER) power = MAX_MOTOR_POWER;
   if (left) {
-    gpio_put(LEFT_MOTOR_DIRECTION, forward);
+    // Note that setting the pin low makes the robot go forward.
+    gpio_put(LEFT_MOTOR_DIRECTION, !forward);
     pwm_set_gpio_level(LEFT_MOTOR_SPEED, power);
   } else {
-    gpio_put(RIGHT_MOTOR_DIRECTION, forward);
+    gpio_put(RIGHT_MOTOR_DIRECTION, !forward);
     pwm_set_gpio_level(RIGHT_MOTOR_SPEED, power);
   }
 }
