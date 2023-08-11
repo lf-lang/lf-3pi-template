@@ -1,5 +1,6 @@
 /**
- * Library reactors for the IMU on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * Library reactors for the IMU on the 
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
  * Note that these reactors rely on the fact that they are executed in an unthreaded
  * runtime. To adapt them for a threaded runtime, they will need to use mutual
  * exclusion to ensure that multiple instances of the reactors are not simultaneously
@@ -92,7 +93,7 @@ reactor TrapezoidalIntegrator {
   output out:float
   reset state s:float = 0
   reset state prev_in:float = 0
-  reset state prev_time:time = 0s
+  reset state prev_time:instant_t = 0
   reaction(in) -> out {=
     instant_t now = lf_time_logical();
     if (self->prev_time > SEC(0)) {
