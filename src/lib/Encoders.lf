@@ -36,10 +36,9 @@ reactor Encoders {
     quadrature_encoder_program_init(pio, LEFT_SM, LEFT_ENCODER_AB, 0);
   =}
   reaction(trigger) -> left_count, right_count {=
-    // The count return is unsigned (uint32_t), but could as well be signed.
     // Also, the sign is reversed, where reverse increases, so we negate.
-    int32_t rcount = -(int32_t)quadrature_encoder_get_count(pio0, RIGHT_SM);
-    int32_t lcount = -(int32_t)quadrature_encoder_get_count(pio0, LEFT_SM);
+    int32_t rcount = -quadrature_encoder_get_count(pio0, RIGHT_SM);
+    int32_t lcount = -quadrature_encoder_get_count(pio0, LEFT_SM);
     lf_set(right_count, rcount);
     lf_set(left_count, lcount);
   =}
