@@ -122,11 +122,13 @@ reactor TrapezoidalIntegrator {
   output z:float;
 
   g = new Gyro()
-  integrators = new[3] TrapezoidalIntegrator()
+  integrator1 = new TrapezoidalIntegrator()
+  integrator2 = new TrapezoidalIntegrator()
+  integrator3 = new TrapezoidalIntegrator()
 
   trigger -> g.trigger
-  g.x, g.y, g.z -> integrators.in
-  integrators.out -> x, y, z
+  g.x, g.y, g.z -> integrator1.in, integrator2.in, integrator3.in
+  integrator1.out, integrator2.out, integrator3.out -> x, y, z
 }
 /**
  * FIXME: temporary single port reactor due to multiport bug above
