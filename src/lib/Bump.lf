@@ -5,6 +5,10 @@
  * true value on the output.  The period at which it periodically samples the bump
  * sensors is a parameter.  During startup, this reactor auto-calibrates the
  * bump sensors.  It recalibrates them each time it receives a calibrate input.
+ *
+ * NOTE: The bump sensors cannot be used together with the line sensors.
+ * See <a href="https://www.pololu.com/docs/0J86/6.5">Section 6.5 of the Pololu 3pi+ 2040 User's Guide</a>.
+ *
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
@@ -18,7 +22,7 @@ preamble {=
     // others
 =}
 
-reactor Bump(sample_period:time = 200ms) {
+reactor Bump(sample_period:time = 100ms) {
     timer t1(0, sample_period);
     input calibrate:bool;
     output left:bool;
