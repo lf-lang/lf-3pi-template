@@ -1,0 +1,39 @@
+target C {
+  platform: "RP2040",
+  threading: false
+}
+
+import LineWithCalibration from "lib/Line.lf"
+import Display from "lib/Display.lf"
+
+main reactor(calibration_time: time = 10 s, sample_period: time = 100 ms) {
+  line = new LineWithCalibration(calibration_time=calibration_time, sample_period=sample_period)
+  disp = new Display()
+
+  timer t(0, 100 ms)
+  state count: int = 0
+
+  reaction(startup) -> disp.line0, disp.line1, disp.line2 {=
+    lf_set(disp.line0, "CALIBRATING");
+    lf_set(disp.line1, "Roll robot over");
+    lf_set(disp.line2, "light and dark.");
+  =}
+
+  reaction(t) -> disp.line3 {=
+    static char buf[17];
+    snprintf(buf, 17, "time:%8d s", (self->count++)/10);
+    lf_set(disp.line3, buf);
+  =}
+
+  reaction(line.reflect, line.average) -> disp.line0, disp.line1, disp.line2 {=
+    static char buf0[17];
+    static char buf1[17];
+    static char buf2[17];
+    snprintf(buf0, 17, "0:%4d 1:%4d", line.reflect->value[0], line.reflect->value[1]);
+    snprintf(buf1, 17, "2:%4d 3:%4d", line.reflect->value[2], line.reflect->value[3]);
+    snprintf(buf2, 17, "4:%4d avg:%4df", line.reflect->value[4], line.average->value);
+    lf_set(disp.line0, buf0);
+    lf_set(disp.line1, buf1);
+    lf_set(disp.line2, buf2);
+  =}
+}
