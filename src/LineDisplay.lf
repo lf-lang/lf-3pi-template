@@ -1,3 +1,14 @@
+/**
+ * Display the outputs from the line sensors on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
+ * This program spends the first 10 seconds in calibration mode, during which
+ * you should move the robot over the light and dark areas that you would like
+ * it to detect.  It then switches into measurement mode and displays the
+ * measured reflectance of the five IR sensors.
+ *
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
 target C {
   platform: "RP2040",
   threading: false
