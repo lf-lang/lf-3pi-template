@@ -1,6 +1,7 @@
 /**
  * This simple demonstration program prints logical time, physical time,
  * and lag (physical time minus logical time) once per second.
+ * @author Abhi Gundrala
  */
 target C {
     platform: "Rp2040",
