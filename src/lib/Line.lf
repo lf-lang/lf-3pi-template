@@ -1,10 +1,21 @@
-/// The latest raw readings from the down-facing line sensors.
 /**
  * @brief Library reactors for the line sensors on the
  * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
  *
  * NOTE: The line sensors cannot be used together with the bump sensors. See <a
  * href="https://www.pololu.com/docs/0J86/6.5">Section 6.5 of the Pololu 3pi+ 2040 User's Guide</a>.
+ *
+ * Upon receiving a trigger input, read the five line sensors and either use the inputs to calibrate
+ * the sensors or produce their values on the `reflect` output as an array with five elements. The
+ * reactor will be initially in calibration mode until a false-valued `calibrate` input is provided.
+ * The first element corresponds to the leftmost sensor, and the last element corresponds to the
+ * rightmost sensor. The readings are between 0 and 1024, with higher readings corresponding to less
+ * light being detected.
+ *
+ * The `calibrate` input, if true, puts the reactor in calibration mode and, if false, puts it in
+ * measurement mode. A typical usage is to provide a true-valued `calibrate` input at startup,
+ * during which the robot should be rolled over light and dark surfaces, and a false-valued
+ * `calibrate` input after some time. The `trigger` input would normally be provided periodically.
  *
  * @author Abhi Gundrala
  * @author Edward A. Lee
@@ -20,81 +31,34 @@ preamble {=
   #include <ir_sensors.h>
 =}
 
-/**
- * Upon receiving a trigger input, read the five line sensors and output their values as an array
- * with five elements. The first element corresponds to the leftmost sensor, and the last element
- * corresponds to the rightmost sensor. The readings are between 0 and 1024, with higher readings
- * corresponding to less light being reflected.
- *
- * When a calibrate input arrives, a measurement is taken to calibrate the sensors. A typical usage
- * is to trigger this a few times via the calibrate input, during which the robot should be rolled
- * over light and dark surfaces, and then swith to triggering it with the trigger input.
- */
 reactor Line {
   input calibrate: bool
   input trigger: bool
   output reflect: uint16_t[5]
-  output average: uint
 
-  state calibrate_flag: bool = false
+  state calibrating: bool = true
+  state calibrated: bool = false  // Indicator of whether calibration has occurred at least once.
 
-  reaction(calibrate) {=
-    line_sensors_calibrate();
-    self->calibrate_flag = true;
-  =}
+  reaction(calibrate) {= self->calibrating = calibrate->value; =}
 
-  reaction(trigger) -> average, reflect {=
-    uint avg = 0;
-    if (!self->calibrate_flag) {
+  reaction(trigger) -> reflect {=
+    if (self->calibrating) {
+      line_sensors_calibrate();
+      self->calibrated = true;
+    } else {
+      if (!self->calibrated) {
+        // Calibration has not been performed, so read raw data.
         line_sensors_read();
         for (int i=0; i<5; i++) {
-            reflect->value[i] = line_sensors[i];
-            avg += reflect->value[i];
+          reflect->value[i] = line_sensors[i];
         }
-    } else {
+      } else {
         line_sensors_read_calibrated();
         for (int i=0; i<5; i++) {
-            reflect->value[i] = line_sensors_calibrated[i];
-            avg += reflect->value[i];
+          reflect->value[i] = line_sensors_calibrated[i];
         }
-    }
-    lf_set(average, avg / 5);
-    lf_set_present(reflect);
-  =}
-}
-
-/**
- * At the rate determined by the sample_period parameter, either perform a calibration measurement
- * or a regular measurement of the line sensors of the robot. If the calibration_time parameter is
- * greater than 0, then calibration will be performed for this amount of time, during which no
- * outputs will be produced. After the calibration phase, the reactor reads the five line sensors
- * and outputs their values as an array with five elements. The first element corresponds to the
- * leftmost sensor, and the last element corresponds to the rightmost sensor. The readings are
- * between 0 and 1024, with higher readings corresponding to less light being reflected.
- */
-reactor LineWithCalibration(calibration_time: time = 10 s, sample_period: time = 100 ms) {
-  output reflect: uint16_t[5]
-  output average: uint
-
-  line = new Line()
-
-  line.reflect -> reflect
-  line.average -> average
-
-  timer t(0, sample_period)
-
-  initial mode CALIBRATING {
-    timer end_calibration(calibration_time)
-    reaction(t) -> line.calibrate {=
-      if (self->calibration_time > 0) {
-        lf_set(line.calibrate, true);
       }
-    =}
-
-    reaction(end_calibration) -> reset(MEASURING) {= lf_set_mode(MEASURING); =}
-  }
-
-  mode MEASURING {
-    reaction(t) -> line.trigger {= lf_set(line.trigger, true); =}
-  }
+      lf_set_present(reflect);
+    }
+  =}
 }
