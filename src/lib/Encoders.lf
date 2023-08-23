@@ -27,19 +27,19 @@ preamble {=
 
 reactor Encoders {
   input trigger:bool
-  output right_count:int32_t; 
-  output left_count:int32_t;
+  output right:int32_t; 
+  output left:int32_t;
   reaction(startup) {=
     PIO pio = pio0;
     pio_add_program(pio, &quadrature_encoder_program);
     quadrature_encoder_program_init(pio, RIGHT_SM, RIGHT_ENCODER_AB, 0);
     quadrature_encoder_program_init(pio, LEFT_SM, LEFT_ENCODER_AB, 0);
   =}
-  reaction(trigger) -> left_count, right_count {=
+  reaction(trigger) -> left, right {=
     // Also, the sign is reversed, where reverse increases, so we negate.
     int32_t rcount = -quadrature_encoder_get_count(pio0, RIGHT_SM);
     int32_t lcount = -quadrature_encoder_get_count(pio0, LEFT_SM);
-    lf_set(right_count, rcount);
-    lf_set(left_count, lcount);
+    lf_set(right, rcount);
+    lf_set(left, lcount);
   =}
 }

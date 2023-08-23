@@ -26,15 +26,15 @@ main reactor {
     lf_set(display.line0, "ENCODERS:");
   =}
 
-  reaction(encoder.left_count) -> display.line1 {=
+  reaction(encoder.left) -> display.line1 {=
     static char buf[17];
-    snprintf(buf, 17, "L: %d", encoder.left_count->value);
+    snprintf(buf, 17, "L: %d", encoder.left->value);
     lf_set(display.line1, buf);
   =}
   
-  reaction(encoder.right_count) -> display.line2 {=
+  reaction(encoder.right) -> display.line2 {=
     static char buf[17];
-    snprintf(buf, 17, "R: %d", encoder.right_count->value);
+    snprintf(buf, 17, "R: %d", encoder.right->value);
     lf_set(display.line2, buf); 
   =}
 }
