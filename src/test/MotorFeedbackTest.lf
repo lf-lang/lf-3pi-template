@@ -1,0 +1,59 @@
+/**
+ * This tests the MotorsWithFeedback reactor by driving forward at 0.1 m/s for 3 seconds,
+ * stopping, the reversing at 0.2 m/s for 1.5 seconds, then stopping again.  The robot should
+ * end up roughly where it started, even on a slope.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+target C {
+    platform: "RP2040",
+    threading: false,
+}
+
+import Display from "../lib/Display.lf"
+import Encoders from "../lib/Encoders.lf"
+import MotorsWithFeedback from "../lib/MotorFeedback.lf";
+
+
+preamble {=
+    // sprintf
+    #include <stdio.h>
+=}
+
+main reactor {
+    d0 = new Display();
+    mf = new MotorsWithFeedback();
+    e0 = new Encoders();
+
+    logical action next;
+
+    timer t(0, 50 ms)
+    timer stop(3 s)
+    timer back(5 s)
+    timer stop_again(6500 ms)
+
+    e0.right -> mf.right;
+    e0.left -> mf.left;
+
+    reaction(t) -> e0.trigger {=
+      lf_set(e0.trigger, true);
+    =}
+
+    reaction(startup) -> d0.line0, mf.left_speed, mf.right_speed {=
+      lf_set(d0.line0, "DRIVE");
+      lf_set(mf.left_speed, 0.1); 
+      lf_set(mf.right_speed, 0.1); 
+    =}
+
+    reaction(stop, stop_again) -> d0.line0, mf.left_speed, mf.right_speed {=
+      lf_set(d0.line0, "STOP");
+      lf_set(mf.left_speed, 0.0); 
+      lf_set(mf.right_speed, 0.0); 
+    =}
+
+    reaction(back) -> d0.line0, mf.left_speed, mf.right_speed {=
+      lf_set(d0.line0, "BACK");
+      lf_set(mf.left_speed, -0.2); 
+      lf_set(mf.right_speed, -0.2); 
+    =}
+}
