@@ -22,26 +22,6 @@ preamble {=
   #define TICKS_PER_METER (WHEEL_DIAMETER * M_PI) / COUNTS_PER_REV
 =}
 
-// proportional controller
-reactor PControl(gain: float = 1.0, bias: float = 0.0) {
-  input err: float
-  output ctrl: float
-
-  reaction(err) -> ctrl {= lf_set(ctrl, err->value * self->gain + self->bias); =}
-}
-
-reactor PIControl(p_gain: float = 1.0, i_gain: float = 1.0) {
-  input err: float
-  output ctrl: float
-  state acum_err: float = 0
-
-  reaction(err) -> ctrl {=
-    self->acum_err += err->value;
-    lf_set(ctrl, err->value * self->p_gain +
-                (self->acum_err) * self->i_gain);
-  =}
-}
-
 reactor MotorsWithFeedback(p_gain: float = 0.5, i_gain: float = 0.25) {
   // Desired speed.
   input left_speed: float
@@ -86,5 +66,17 @@ reactor MotorsWithFeedback(p_gain: float = 0.5, i_gain: float = 0.25) {
       lf_set(control_right.err, self->target_speed_right - est_speed_right);
     }
     self->prev_time = now;
+  =}
+}
+
+reactor PIControl(p_gain: float = 1.0, i_gain: float = 1.0) {
+  input err: float
+  output ctrl: float
+  state acum_err: float = 0
+
+  reaction(err) -> ctrl {=
+    self->acum_err += err->value;
+    lf_set(ctrl, err->value * self->p_gain +
+                (self->acum_err) * self->i_gain);
   =}
 }
