@@ -1,0 +1,85 @@
+/**
+ * The MotorsWithFeedback reactor wraps the Motors reactor with feedback control.
+ * You specify the desired speed (in meters per second) on the `left_speed` and `right_speed` inputs
+ * and then provide the `left` and `right` encoder inputs.  For each encoder input, the controller
+ * updates the power input to each of the motors in an attempt to get the speed to match the desired
+ * speed.  This controller is proportional-integral (PI) controller with empirically chosen gains.
+ * It seems to work well with a sample period of about 50 ms.
+ * @author Abhi Gundrala
+ * @author Edward A. Lee
+ */
+target C {
+  platform: "RP2040",
+  threading: false
+}
+
+import Motors from "Motors.lf"
+
+preamble {=
+  #include <math.h>
+  #define WHEEL_DIAMETER 0.032 // meters
+  #define COUNTS_PER_REV 360 //CPR
+  #define TICKS_PER_METER (WHEEL_DIAMETER * M_PI) / COUNTS_PER_REV
+=}
+
+reactor MotorsWithFeedback(p_gain: float = 0.5, i_gain: float = 0.25) {
+  // Desired speed.
+  input left_speed: float
+  input right_speed: float
+
+  // Encoder inputs.
+  input left: int32_t
+  input right: int32_t
+
+  motors = new Motors()
+
+  state prev_time: time = 0
+  state prev_left: int32_t = 0
+  state prev_right: int32_t = 0
+  state target_speed_left: float = 0
+  state target_speed_right: float = 0
+
+  control_left = new PIControl(p_gain=p_gain, i_gain=i_gain)
+  control_right = new PIControl(p_gain=p_gain, i_gain=i_gain)
+
+  control_left.ctrl -> motors.left_power
+  control_right.ctrl -> motors.right_power
+
+  reaction(left_speed) {= self->target_speed_left = left_speed->value; =}
+
+  reaction(right_speed) {= self->target_speed_right = right_speed->value; =}
+
+  // React to encoder inputs.
+  reaction(left, right) -> control_left.err, control_right.err {=
+    // Ignore the first input because we can't estimate speed.
+    instant_t now = lf_time_logical();
+    if (self->prev_time > 0) {
+      interval_t interval = now - self->prev_time;
+
+      // Ignore intervals that are too small. Assume a maximum sample rate of 1kHz.
+      if (interval >= MSEC(1)) {
+        float est_speed_left = ((left->value - self->prev_left) * TICKS_PER_METER) / (interval * 1e-9f);
+        float est_speed_right = ((right->value - self->prev_right) * TICKS_PER_METER) / (interval * 1e-9f);
+
+        self->prev_left = left->value;
+        self->prev_right = right->value;
+
+        lf_set(control_left.err, self->target_speed_left - est_speed_left);
+        lf_set(control_right.err, self->target_speed_right - est_speed_right);
+      }
+    }
+    self->prev_time = now;
+  =}
+}
+
+reactor PIControl(p_gain: float = 1.0, i_gain: float = 1.0) {
+  input err: float
+  output ctrl: float
+  state acum_err: float = 0
+
+  reaction(err) -> ctrl {=
+    self->acum_err += err->value;
+    lf_set(ctrl, err->value * self->p_gain +
+                (self->acum_err) * self->i_gain);
+  =}
+}
