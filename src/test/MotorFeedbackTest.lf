@@ -12,7 +12,7 @@ target C {
 
 import Display from "../lib/Display.lf"
 import Encoders from "../lib/Encoders.lf"
-import MotorsWithFeedback from "../lib/MotorFeedback.lf";
+import MotorsWithFeedback from "../lib/MotorsWithFeedback.lf";
 
 
 preamble {=
