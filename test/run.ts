@@ -31,16 +31,23 @@ async function runTestHex(path: string): Promise<string> {
     return new Promise<string>((resolve) => {
         const hex = fs.readFileSync(path, 'utf-8');
         const mcu = new RP2040();
-        const uartOut = [];
         mcu.loadBootrom(bootromB1);
         mcu.logger = new ConsoleLogger(LogLevel.Error);
         loadHex(hex, mcu.flash, 0x10000000);
+        
+        // write uart out to file
+        var uartOutFile = fs.createWriteStream(`${path}_out.txt`);
         mcu.uart[0].onByte = (value) => {
-            uartOut.push(value);
-        }; 
+            uartOutFile.write(new Uint8Array([value]));
+        };
+
         mcu.core.PC = 0x10000000; 
         mcu.execute();
-        
+
+        // MODIFY THE FOLLOWING
+        // The following callback determines if a test has failed or passed
+        // Currently a test only succeeds if it stops executing before 10 seconds
+
         setTimeout(() => {
             // TODO: check no error log
             if(!mcu.executing) {
@@ -51,7 +58,9 @@ async function runTestHex(path: string): Promise<string> {
                 resolve('FAIL');
             }
         }, 10000); // 10 seconds
+
     });
+    //TODO: add gdb support
     //const gdbServer = new GDBTCPServer(mcu, 3333);
     //console.log(`RP2040 GDB Server ready! Listening on port ${gdbServer.port}`);
 }
@@ -67,26 +76,18 @@ async function runAllTestHex(hexPaths: string[]): Promise<string> {
     const testRuns = hexPaths.map((path) => runTestHex(path));
     const results = await Promise.allSettled(testRuns);
     return new Promise<string>((resolve) => {
-        console.log('Successful or Timeout Tests');
+        console.log('Executed');
         const fulRes = results
             .filter(isFulfilled)
             .map((res, ind) => `${hexPaths[ind]}: ${res.value}`);
         console.log(fulRes);
-        console.log('Emulator Failure Tests');
-        const rejRes = results
-            .filter(isRejected)
-            .map((res, ind) => `${hexPaths[ind]}: ${res.reason}`);
-        console.log(rejRes);
         resolve('==== Tests Complete ====');
     });
 }
 
-
-// TODO read out hex path list
 readBinDir(curDir)
     .then((files) => {
         const paths = files.map((fname) => `${curDir}/${fname}`); 
-        console.log(paths);
         runAllTestHex(paths)
             .then((result) => {
                 console.log(result);
