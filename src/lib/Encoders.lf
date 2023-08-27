@@ -9,20 +9,23 @@
  * @author Edward A. Lee
  */
 target C {
-    platform: "RP2040",
-    threading: false,
+  platform: {
+    name: "rp2040",
+    board: "pololu_3pi_2040_robot"
+  },
+  threading: false,
 }
 
 preamble {=
-    #include <math.h> 
-    #include <hardware/pio.h>
-    #include <quadrature_encoder.pio.h>
+  #include <math.h> 
+  #include <hardware/pio.h>
+  #include <quadrature_encoder.pio.h>
 
-    // pin defines
-    #define RIGHT_ENCODER_AB 8
-    #define LEFT_ENCODER_AB 12
-    #define RIGHT_SM 0
-    #define LEFT_SM 1
+  // pin defines
+  #define RIGHT_ENCODER_AB 8
+  #define LEFT_ENCODER_AB 12
+  #define RIGHT_SM 0
+  #define LEFT_SM 1
 =}
 
 reactor Encoders {

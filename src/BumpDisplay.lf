@@ -6,8 +6,11 @@
  * @author Edward A. Lee
  */
 target C {
-    platform: "rp2040",
-    threading: false,
+  platform: {
+    name: "rp2040",
+    board: "pololu_3pi_2040_robot"
+  },
+  threading: false,
 }
 
 import Bump from "lib/Bump.lf"

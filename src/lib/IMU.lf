@@ -10,7 +10,10 @@
  * @author Edward A. Lee
  */
 target C {
-  platform: "RP2040", 
+  platform: {
+    name: "rp2040",
+    board: "pololu_3pi_2040_robot"
+  },
   threading: false,
   files: ["../../robot-lib/"],                      // Needed to find imu.h
   cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find imu.h

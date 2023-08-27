@@ -4,9 +4,12 @@
  * @author Abhi Gundrala
  */
 target C {
-    platform: "Rp2040",
-    threading: false,
-    timeout: 60 sec,
+  platform: {
+    name: "rp2040",
+    board: "pololu_3pi_2040_robot"
+  },
+  threading: false,
+  timeout: 60 sec,
 }
 
 preamble {=
