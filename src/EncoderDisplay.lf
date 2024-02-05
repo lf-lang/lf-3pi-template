@@ -9,7 +9,7 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
+  single-threaded: true
 }
 
 import Display from "lib/Display.lf"
@@ -19,7 +19,7 @@ main reactor {
   display = new Display()
   encoder = new Encoders()
 
-  timer t(0, 1s)
+  timer t(0, 1 s)
 
   reaction(t) -> encoder.trigger {=
     lf_set(encoder.trigger, true);
@@ -34,10 +34,10 @@ main reactor {
     snprintf(buf, 17, "L: %d", encoder.left->value);
     lf_set(display.line1, buf);
   =}
-  
+
   reaction(encoder.right) -> display.line2 {=
     static char buf[17];
     snprintf(buf, 17, "R: %d", encoder.right->value);
-    lf_set(display.line2, buf); 
+    lf_set(display.line2, buf);
   =}
 }

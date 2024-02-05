@@ -1,11 +1,10 @@
 /**
- * Library reactors for the IMU on the 
- * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
- * Note that these reactors rely on the fact that they are executed in an unthreaded
- * runtime. To adapt them for a threaded runtime, they will need to use mutual
- * exclusion to ensure that multiple instances of the reactors are not simultaneously
- * accessing the shared hardware resource.
- * 
+ * Library reactors for the IMU on the
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>. Note that these reactors
+ * rely on the fact that they are executed in an unthreaded runtime. To adapt them for a threaded
+ * runtime, they will need to use mutual exclusion to ensure that multiple instances of the reactors
+ * are not simultaneously accessing the shared hardware resource.
+ *
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
@@ -14,8 +13,8 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
-  files: ["../../robot-lib/"],                      // Needed to find imu.h
+  single-threaded: true,
+  files: ["../../robot-lib/"],  // Needed to find imu.h
   cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find imu.h
 }
 
@@ -24,9 +23,7 @@ preamble {=
   #include <imu.h>
 =}
 
-/**
- * Base class for IMU reactors.
- */
+/** Base class for IMU reactors. */
 reactor IMUBase {
   preamble {=
     // Static global IMU instance struct.
@@ -35,11 +32,11 @@ reactor IMUBase {
     static bool _pololu_robot_imu_initialized = false;
   =}
 
-  input trigger:bool;
-    
-  output x:float;
-  output y:float;
-  output z:float;
+  input trigger: bool
+
+  output x: float
+  output y: float
+  output z: float
 
   reaction(startup) {=
     if (!_pololu_robot_imu_initialized) {
@@ -50,32 +47,32 @@ reactor IMUBase {
 }
 
 /**
- * When triggered by an input (whose value is ignored), sample the accelerometer
- * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
- * The accelerometer is provided by an
- * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
- * The outputs give acceleration in <i>g</i>'s with a range of -2 to +2 <i>g</i>
- * and a sensitivity of approximately 0.061 <i>mg</i>'s.
+ * When triggered by an input (whose value is ignored), sample the accelerometer on the <a
+ * href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>. The accelerometer is provided
+ * by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement
+ * unit</a>. The outputs give acceleration in <i>g</i>'s with a range of -2 to +2 <i>g</i> and a
+ * sensitivity of approximately 0.061 <i>mg</i>'s.
  */
-reactor Accelerometer extends IMUBase {  
-  reaction(trigger) -> x, y, z {= 
+reactor Accelerometer extends IMUBase {
+  reaction(trigger) -> x, y, z {=
     axes_data_t acc_data;
-    imu_read_acc(&imu_instance, &acc_data);
+        imu_read_acc(&imu_instance, &acc_data);
 
-    lf_set(x, acc_data.x);
-    lf_set(y, acc_data.y);
-    lf_set(z, acc_data.z);   
+        lf_set(x, acc_data.x);
+        lf_set(y, acc_data.y);
+        lf_set(z, acc_data.z);
   =}
 }
 
 /**
- * When triggered by an input (whose value is ignored), sample the gyroscope
- * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
- * The gyroscope is provided by an
- * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
- * The outputs give angular velocity in degrees per second.
+ * When triggered by an input (whose value is ignored), sample the gyroscope on the <a
+ * href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>. The gyroscope is provided by
+ * an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement
+ * unit</a>. The outputs give angular velocity in degrees per second.
  */
- reactor Gyro extends IMUBase {
+reactor Gyro extends IMUBase {
   reaction(trigger) -> x, y, z {=
     axes_data_t gyro_data;
     imu_read_gyro(&imu_instance, &gyro_data);
@@ -86,17 +83,17 @@ reactor Accelerometer extends IMUBase {
 }
 
 /**
- * Integrate the sequence of inputs using the trapezoidal method.
- * The first output is always zero.  Subsequent outputs are the
- * sum of the current and previous inputs multiplied by the time
- * interval since the last input (in seconds) divided by two.
+ * Integrate the sequence of inputs using the trapezoidal method. The first output is always zero.
+ * Subsequent outputs are the sum of the current and previous inputs multiplied by the time interval
+ * since the last input (in seconds) divided by two.
  */
 reactor TrapezoidalIntegrator {
-  input in:float
-  output out:float
-  reset state s:float = 0
-  reset state prev_in:float = 0
-  reset state prev_time:instant_t = 0
+  input in: float
+  output out: float
+  reset state s: float = 0
+  reset state prev_in: float = 0
+  reset state prev_time: instant_t = 0
+
   reaction(in) -> out {=
     instant_t now = lf_time_logical();
     if (self->prev_time > SEC(0)) {
@@ -110,19 +107,19 @@ reactor TrapezoidalIntegrator {
 }
 
 /**
- * When triggered by an input (whose value is ignored), sample the gyroscope
- * on the <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>
- * and integrate its output.  The output is an estimate of the angle (in degrees)
- * of the robot relative to its angle when first triggered along each of three axes.
- * The gyroscope is provided by an
- * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
+ * When triggered by an input (whose value is ignored), sample the gyroscope on the <a
+ * href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a> and integrate its output. The
+ * output is an estimate of the angle (in degrees) of the robot relative to its angle when first
+ * triggered along each of three axes. The gyroscope is provided by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement
+ * unit</a>.
  */
- reactor GyroAngle {
-  input trigger:bool;
-    
-  output x:float;
-  output y:float;
-  output z:float;
+reactor GyroAngle {
+  input trigger: bool
+
+  output x: float
+  output y: float
+  output z: float
 
   g = new Gyro()
   integrator1 = new TrapezoidalIntegrator()

@@ -1,10 +1,10 @@
 /**
- * The MotorsWithFeedback reactor wraps the Motors reactor with feedback control.
- * You specify the desired speed (in meters per second) on the `left_speed` and `right_speed` inputs
- * and then provide the `left` and `right` encoder inputs.  For each encoder input, the controller
- * updates the power input to each of the motors in an attempt to get the speed to match the desired
- * speed.  This controller is proportional-integral (PI) controller with empirically chosen gains.
- * It seems to work well with a sample period of about 50 ms.
+ * The MotorsWithFeedback reactor wraps the Motors reactor with feedback control. You specify the
+ * desired speed (in meters per second) on the `left_speed` and `right_speed` inputs and then
+ * provide the `left` and `right` encoder inputs. For each encoder input, the controller updates the
+ * power input to each of the motors in an attempt to get the speed to match the desired speed. This
+ * controller is proportional-integral (PI) controller with empirically chosen gains. It seems to
+ * work well with a sample period of about 50 ms.
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
@@ -13,7 +13,7 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
+  single-threaded: true
 }
 
 import Motors from "Motors.lf"
@@ -26,12 +26,10 @@ preamble {=
 =}
 
 reactor MotorsWithFeedback(p_gain: float = 0.5, i_gain: float = 0.25) {
-  // Desired speed.
-  input left_speed: float
+  input left_speed: float  // Desired speed.
   input right_speed: float
 
-  // Encoder inputs.
-  input left: int32_t
+  input left: int32_t      // Encoder inputs.
   input right: int32_t
 
   motors = new Motors()
@@ -48,9 +46,13 @@ reactor MotorsWithFeedback(p_gain: float = 0.5, i_gain: float = 0.25) {
   control_left.ctrl -> motors.left_power
   control_right.ctrl -> motors.right_power
 
-  reaction(left_speed) {= self->target_speed_left = left_speed->value; =}
+  reaction(left_speed) {=
+    self->target_speed_left = left_speed->value;
+  =}
 
-  reaction(right_speed) {= self->target_speed_right = right_speed->value; =}
+  reaction(right_speed) {=
+    self->target_speed_right = right_speed->value;
+  =}
 
   // React to encoder inputs.
   reaction(left, right) -> control_left.err, control_right.err {=

@@ -1,29 +1,27 @@
 /**
- * Template for robot driving lab exercises.
- * This template just periodically switches between a
- * STOPPED and a DRIVING mode, updating the LCD display
- * on each change of mode.
+ * Template for robot driving lab exercises. This template just periodically switches between a
+ * STOPPED and a DRIVING mode, updating the LCD display on each change of mode.
  */
 target C {
   platform: {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
+  single-threaded: true
 }
 
 import Display from "lib/Display.lf"
 
 reactor Robot {
-  input drive:bool       // Toggle mode.
-  output notify:string   // Notify of mode change.
+  input drive: bool      // Toggle mode.
+  output notify: string  // Notify of mode change.
 
   reaction(startup) -> notify {=
     lf_set(notify, "INIT");
   =}
 
   initial mode STOPPED {
-    reaction(drive) -> DRIVING, notify {=
+    reaction(drive) -> reset(DRIVING), notify {=
       if (drive->value) {
         lf_set_mode(DRIVING);
         lf_set(notify, "DRIVING");
@@ -32,7 +30,7 @@ reactor Robot {
   }
 
   mode DRIVING {
-    reaction(drive) -> STOPPED, notify {=
+    reaction(drive) -> reset(STOPPED), notify {=
       if (!drive->value) {
         lf_set_mode(STOPPED);
         lf_set(notify, "STOPPED");
@@ -43,13 +41,14 @@ reactor Robot {
 
 main reactor {
   timer t(0, 2 sec)
-  state drive:bool = false
+  state drive: bool = false
   robot = new Robot()
   display = new Display()
+  robot.notify -> display.line0
+
   reaction(t) -> robot.drive {=
-      lf_set(robot.drive, self->drive);
-      // Toggle the drive state variable for next time.
-      self->drive = !self->drive;
+    lf_set(robot.drive, self->drive);
+    // Toggle the drive state variable for next time.
+    self->drive = !self->drive;
   =}
-  robot.notify -> display.line0;
 }
