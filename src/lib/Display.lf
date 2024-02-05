@@ -10,7 +10,7 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
+  single-threaded: true,
   files: ["../../robot-lib/"],  // Needed to find display.h
   cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find display.h
 }
@@ -21,7 +21,9 @@ preamble {=
 =}
 
 reactor Display {
-  preamble {= static bool _pololu_robot_display_initialized = false; =}
+  preamble {=
+    static bool _pololu_robot_display_initialized = false;
+  =}
   input line0: string  // inputs
   input line1: string
   input line2: string

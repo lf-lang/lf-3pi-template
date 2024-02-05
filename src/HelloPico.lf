@@ -1,43 +1,42 @@
 /**
- * Simple test of use of printf with the Raspberry Pi 2040.
- * To compile and run this program, put your RPi in BOOTSEL mode and
- * go to the lf-pico directory and do this:
- * 
+ * Simple test of use of printf with the Raspberry Pi 2040. To compile and run this program, put
+ * your RPi in BOOTSEL mode and go to the lf-pico directory and do this:
  * ```
  *    $ lfc src/HelloPico.lf
  *    $ picotool load -x bin/HelloPico.elf
  * ```
+
  *
- * This will create a new serial port USB device on your host machine that
- * you can use to connect to the running program and observe its printed
- * outputs. You need to first find the name of the device. Here is an example:
- *
+ * This will create a new serial port USB device on your host machine that you can use to connect to
+ * the running program and observe its printed outputs. You need to first find the name of the
+ * device. Here is an example:
  * ```
  *    $ ls /dev/*usb*
  *    /dev/cu.usbmodem14201	/dev/tty.usbmodem14201
  * ```
+
  *
  * From a terminal, connect to the first of these devices (the cu... one) using screen:
- *
  * ```
  *    screen /dev/cu.usbmodem14201 115200
  * ```
+
  *
  * The second argument is the baud rate. You should now see a sequence like this:
- *
  * ```
  *    Hello World! 135
  *    Hello World! 136
  *    Hello World! 137
  *    Hello World! 138
  * ```
+
  *
- * You can get back to a normal terminal by detaching from screen by typing Control-A
- * followed by d.  You can reattach (and see any missing printing) using the command:
- *
+ * You can get back to a normal terminal by detaching from screen by typing Control-A followed by d.
+ * You can reattach (and see any missing printing) using the command:
  * ```
  *    $ screen -r
  * ```
+
  *
  * @author Abhi Gundrala
  * @author Edward A. Lee
@@ -47,18 +46,19 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
+  single-threaded: true
 }
 
 preamble {=
-    #include <stdio.h>
-    #include "pico/stdlib.h"
+  #include <stdio.h>
+  #include "pico/stdlib.h"
 =}
 
 main reactor {
-    timer t1(0, 1 sec)
-    state count:int = 0
-    reaction(t1) {=
-        printf("Hello World! %d\n", self->count++);
-    =}
+  timer t1(0, 1 sec)
+  state count: int = 0
+
+  reaction(t1) {=
+    printf("Hello World! %d\n", self->count++);
+  =}
 }

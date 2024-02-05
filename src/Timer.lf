@@ -1,6 +1,6 @@
 /**
- * This simple demonstration program prints logical time, physical time,
- * and lag (physical time minus logical time) once per second.
+ * This simple demonstration program prints logical time, physical time, and lag (physical time
+ * minus logical time) once per second.
  * @author Abhi Gundrala
  */
 target C {
@@ -8,23 +8,24 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
-  timeout: 60 sec,
+  single-threaded: true,
+  timeout: 60 sec
 }
 
 preamble {=
-    #include <stdio.h>
-    #include "pico/stdlib.h"
+  #include <stdio.h>
+  #include "pico/stdlib.h"
 =}
 
 main reactor {
-    timer t1(0, 1 sec); 
-    reaction(t1) {=
-        interval_t t = lf_time_logical_elapsed();
-        interval_t T = lf_time_physical_elapsed();
-        printf(
-            "Elapsed logical time %lld, physical time %lld, lag: %lld\n", 
-            t, T, T-t
-        );
-    =}
+  timer t1(0, 1 sec)
+
+  reaction(t1) {=
+    interval_t t = lf_time_logical_elapsed();
+    interval_t T = lf_time_physical_elapsed();
+    printf(
+        "Elapsed logical time %lld, physical time %lld, lag: %lld\n",
+        t, T, T-t
+    );
+  =}
 }

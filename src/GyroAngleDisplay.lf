@@ -1,9 +1,9 @@
 /**
  * Display measurements from the gyroscope on the
- * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>
- * with integration so the result is in degrees since reset.
- * The gyroscope is provided by an
- * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement unit</a>.
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a> with integration so the
+ * result is in degrees since reset. The gyroscope is provided by an
+ * <a href="https://www.pololu.com/file/0J1899/lsm6dso.pdf">ST LMS6DSO inertial measurement
+ * unit</a>.
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
@@ -12,7 +12,7 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
+  single-threaded: true
 }
 
 import Display from "lib/Display.lf"
@@ -22,7 +22,7 @@ main reactor {
   display = new Display()
   gyro = new GyroAngle()
 
-  timer t(0, 100ms)
+  timer t(0, 100 ms)
 
   reaction(t) -> gyro.trigger {=
     lf_set(gyro.trigger, true);

@@ -1,10 +1,9 @@
 /**
  * Display the outputs from the line sensors on the
- * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>.
- * This program spends the first 10 seconds in calibration mode, during which
- * you should move the robot over the light and dark areas that you would like
- * it to detect.  It then switches into measurement mode and displays the
- * measured reflectance of the five IR sensors.
+ * <a href="https://www.pololu.com/docs/0J86">Pololu 3pi+ 2040 robot</a>. This program spends the
+ * first 10 seconds in calibration mode, during which you should move the robot over the light and
+ * dark areas that you would like it to detect. It then switches into measurement mode and displays
+ * the measured reflectance of the five IR sensors.
  *
  * @author Abhi Gundrala
  * @author Edward A. Lee
@@ -14,7 +13,7 @@ target C {
     name: "rp2040",
     board: "pololu_3pi_2040_robot"
   },
-  threading: false,
+  single-threaded: true
 }
 
 import Line from "lib/Line.lf"
@@ -25,8 +24,7 @@ main reactor(calibration_time: time = 10 s, sample_period: time = 100 ms) {
   disp = new Display()
 
   timer t(0, sample_period)
-  // Timer used to display seconds.
-  timer seconds(0, 1 s)
+  timer seconds(0, 1 s)  // Timer used to display seconds.
   timer end_calibration(calibration_time)
   state count: int = 0
 
