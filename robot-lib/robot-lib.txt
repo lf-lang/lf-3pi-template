@@ -1,2 +1,2 @@
 add_subdirectory(robot-lib robot)
-target_link_libraries(${LF_MAIN_TARGET} robot)
+target_link_libraries(${LF_MAIN_TARGET} PUBLIC robot)
