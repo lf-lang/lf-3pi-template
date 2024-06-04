@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-
+  workflow_call:
+    inputs:
+      compiler_ref:
+        type: string
 jobs:
   find-latest-release:
     uses: lf-lang/lingua-franca/.github/workflows/latest-release.yml@master
@@ -31,7 +34,7 @@ jobs:
           no_compile_flag: false
           exclude_dirs: '["failing", "experimental"]'
           checkout_dir: '../lingua-franca'
-          compiler_ref: ${{ needs.find-latest-release.outputs.ref }}
+          compiler_ref: ${{ inputs.compiler-ref || needs.find-latest-release.outputs.ref }}
 
   check-format:
     runs-on: ubuntu-latest
@@ -48,4 +51,4 @@ jobs:
           check_mode: "format"
           exclude_dirs: '["failing", "experimental"]'
           checkout_dir: '../lingua-franca'
-          compiler_ref: ${{ needs.find-latest-release.outputs.ref }}
+          compiler_ref: ${{ inputs.compiler-ref || needs.find-latest-release.outputs.ref }}
