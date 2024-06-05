@@ -1,0 +1,11 @@
+name: 'Check compatibility with Lingua Franca master'
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 20 * * Fri"
+
+jobs:
+  run-ci:
+    uses: ./.github/workflows/ci.yml
+    with:
+      compiler-ref: master
