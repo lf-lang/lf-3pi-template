@@ -11,7 +11,8 @@ on:
 jobs:
   find-latest-release:
     uses: lf-lang/lingua-franca/.github/workflows/latest-release.yml@master
-    
+    if: ${{ inputs.compiler-ref == '' }}
+
   check-compile:
     runs-on: ubuntu-latest
     needs: find-latest-release
