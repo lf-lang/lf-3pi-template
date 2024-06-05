@@ -6,7 +6,7 @@ on:
       - main
   workflow_call:
     inputs:
-      compiler_ref:
+      compiler-ref:
         type: string
 jobs:
   find-latest-release:
