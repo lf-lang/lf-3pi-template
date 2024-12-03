@@ -20,15 +20,7 @@
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
-target C {
-  platform: {
-    name: "rp2040",
-    board: "pololu_3pi_2040_robot"
-  },
-  single-threaded: true,
-  files: ["../../robot-lib/"],  // Needed to find ir_senrors.h
-  cmake-include: ["../../robot-lib/robot-lib.txt"]  // Needed to find ir_senrors.h
-}
+target uC
 
 preamble {=
   #include <ir_sensors.h>

@@ -26,7 +26,7 @@ The text framework source code is available and can be easily extended. Currentl
 target property to the program header.
 
 ```
-target C {
+target uC {
     ...
     timeout: 5 sec,
 }

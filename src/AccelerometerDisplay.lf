@@ -15,10 +15,8 @@
  *
  * @author Edward A. Lee
  */
-target C {
-  platform: "RP2040",
-  single-threaded: true
-}
+target uC;
+
 
 import Accelerometer from "lib/IMU.lf"
 import Display from "lib/Display.lf"

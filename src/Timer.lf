@@ -3,12 +3,7 @@
  * minus logical time) once per second.
  * @author Abhi Gundrala
  */
-target C {
-  platform: {
-    name: "rp2040",
-    board: "pololu_3pi_2040_robot"
-  },
-  single-threaded: true,
+target uC {
   timeout: 60 sec
 }
 
@@ -21,8 +16,8 @@ main reactor {
   timer t1(0, 1 sec)
 
   reaction(t1) {=
-    interval_t t = lf_time_logical_elapsed();
-    interval_t T = lf_time_physical_elapsed();
+    interval_t t = env->get_elapsed_logical_time(env);
+    interval_t T = env->get_elapsed_physical_time(env);
     printf(
         "Elapsed logical time %lld, physical time %lld, lag: %lld\n",
         t, T, T-t

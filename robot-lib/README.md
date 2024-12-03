@@ -6,7 +6,7 @@ These files are used in Lingua Franca examples provided in the src directory of 
 repository.  To use these library routines in your Lingua Franca program, it is necessary to include the following directives in your target declaration:
 
 ```
-target C {
+target uC {
   platform: "RP2040", 
   threading: false,
   files: ["../../robot-lib/"],                      // Needed to find imu.h

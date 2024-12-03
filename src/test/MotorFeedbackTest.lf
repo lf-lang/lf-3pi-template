@@ -5,10 +5,8 @@
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
-target C {
-  platform: "RP2040",
-  single-threaded: true
-}
+target uC;
+
 
 import Display from "../lib/Display.lf"
 import Encoders from "../lib/Encoders.lf"

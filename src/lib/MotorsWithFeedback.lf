@@ -8,13 +8,8 @@
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
-target C {
-  platform: {
-    name: "rp2040",
-    board: "pololu_3pi_2040_robot"
-  },
-  single-threaded: true
-}
+target uC;
+
 
 import Motors from "Motors.lf"
 

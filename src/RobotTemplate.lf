@@ -2,13 +2,7 @@
  * Template for robot driving lab exercises. This template just periodically switches between a
  * STOPPED and a DRIVING mode, updating the LCD display on each change of mode.
  */
-target C {
-  platform: {
-    name: "rp2040",
-    board: "pololu_3pi_2040_robot"
-  },
-  single-threaded: true
-}
+target uC;
 
 import Display from "lib/Display.lf"
 

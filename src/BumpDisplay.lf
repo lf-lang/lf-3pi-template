@@ -4,13 +4,7 @@
  * @author Abhi Gundrala
  * @author Edward A. Lee
  */
-target C {
-  platform: {
-    name: "rp2040",
-    board: "pololu_3pi_2040_robot"
-  },
-  single-threaded: true
-}
+target uC
 
 import Bump from "lib/Bump.lf"
 import Display from "lib/Display.lf"
@@ -24,6 +18,7 @@ main reactor {
     lf_set(disp.line0, "Left Bumped!");
     lf_schedule(clear, SEC(2));
   =}
+
 
   reaction(bump.right) -> disp.line1, clear {=
     lf_set(disp.line1, "Right Bumped!");

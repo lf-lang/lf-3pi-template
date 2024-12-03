@@ -1,8 +1,5 @@
 /** Simple test of the motors that rotates the robot both ways. */
-target C {
-  platform: "RP2040",
-  single-threaded: true
-}
+target uC
 
 import Motors from "../lib/Motors.lf"
 
