@@ -39,7 +39,7 @@ LF_MAIN_NAME=$(basename ${LF_MAIN} .lf)
 SRC_DIR=$(dirname ${LF_MAIN})
 SRC_GEN_PATH=$(echo ${SRC_DIR} | sed "s/src/src-gen/")
 
-LFC_COMMAND=${REACTOR_UC_PATH}/lfc/bin/lfc-dev ${LF_MAIN}
+LFC_COMMAND="${REACTOR_UC_PATH}/lfc/bin/lfc-dev ${LF_MAIN}"
 echo "Running LFC command: ${LFC_COMMAND}"
 ${LFC_COMMAND}
 

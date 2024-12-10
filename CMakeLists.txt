@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
-include(${CMAKE_CURRENT_SOURCE_DIR}/pico-sdk/pico_sdk_init.cmake)
+set(PICO_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/pico-sdk CACHE STRING "")
+include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 project(reactor-uc-3pi)
 
 set(LF_MAIN_NAME "Blink" CACHE STRING "Name of the LF application")
@@ -21,5 +22,5 @@ pico_enable_stdio_uart(${LF_MAIN_NAME} 1)
 
 # Link with the polulu_3pi_2040_robot library.
 add_subdirectory(robot-lib)
-target_link_libraries(${LF_MAIN} PRIVATE robot)
-target_include_directories(${LF_MAIN} PRIVATE robot-lib/src)
+target_link_libraries(${LF_MAIN_NAME} PRIVATE robot)
+target_include_directories(${LF_MAIN_NAME} PRIVATE robot-lib/src)
