@@ -9,7 +9,6 @@ build/%.elf: src/%.lf
 
 .PHONY: test
 test: ${ELFS}
-	echo "--- Running Tests ---"
 
 .PHONY: clean
 clean:
