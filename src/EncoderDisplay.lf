@@ -24,14 +24,14 @@ main reactor {
   =}
 
   reaction(encoder.left) -> display.line1 {=
-    static char buf[17];
-    snprintf(buf, 17, "L: %d", encoder.left->value);
+    DisplayString buf;
+    snprintf(buf.text, 17, "L: %d", encoder.left->value);
     lf_set(display.line1, buf);
   =}
 
   reaction(encoder.right) -> display.line2 {=
-    static char buf[17];
-    snprintf(buf, 17, "R: %d", encoder.right->value);
+    DisplayString buf;
+    snprintf(buf.text, 17, "R: %d", encoder.right->value);
     lf_set(display.line2, buf);
   =}
 }

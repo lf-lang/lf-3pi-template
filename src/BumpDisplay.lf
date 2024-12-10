@@ -14,6 +14,11 @@ main reactor {
   disp = new Display()
   logical action clear
 
+  reaction(startup) {=
+    printf("Hello World!\n");
+
+  =}
+
   reaction(bump.left) -> disp.line0, clear {=
     lf_set(disp.line0, "Left Bumped!");
     lf_schedule(clear, SEC(2));

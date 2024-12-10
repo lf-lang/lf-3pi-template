@@ -24,12 +24,15 @@ target uC
 
 preamble {=
   #include <ir_sensors.h>
+  typedef struct {
+    uint16_t value[5];
+  } LineReflect;
 =}
 
 reactor Line {
   input calibrate: bool
   input trigger: bool
-  output reflect: uint16_t[5]
+  output reflect: LineReflect
 
   state calibrating: bool = true
   state calibrated: bool = false  // Indicator of whether calibration has occurred at least once.
@@ -39,6 +42,7 @@ reactor Line {
   =}
 
   reaction(trigger) -> reflect {=
+    LineReflect reflect_sample;
     if (self->calibrating) {
       line_sensors_calibrate();
       self->calibrated = true;
@@ -47,15 +51,15 @@ reactor Line {
         // Calibration has not been performed, so read raw data.
         line_sensors_read();
         for (int i=0; i<5; i++) {
-          reflect->value[i] = line_sensors[i];
+          reflect_sample.value[i] = line_sensors[i];
         }
       } else {
         line_sensors_read_calibrated();
         for (int i=0; i<5; i++) {
-          reflect->value[i] = line_sensors_calibrated[i];
+          reflect_sample.value[i] = line_sensors_calibrated[i];
         }
       }
-      lf_set_present(reflect);
+      lf_set(reflect, reflect_sample);
     }
   =}
 }

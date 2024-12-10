@@ -27,20 +27,20 @@ main reactor {
   =}
 
   reaction(gyro.x) -> display.line1 {=
-    static char buf[17];
-    snprintf(buf, 17, "x: %.1f", gyro.x->value);
+    DisplayString buf;
+    snprintf(buf.text, 17, "x: %.1f", gyro.x->value);
     lf_set(display.line1, buf);
   =}
 
   reaction(gyro.y) -> display.line2 {=
-    static char buf[17];
-    snprintf(buf, 17, "y: %.1f", gyro.y->value);
+    DisplayString buf;
+    snprintf(buf.text, 17, "y: %.1f", gyro.y->value);
     lf_set(display.line2, buf);
   =}
 
   reaction(gyro.z) -> display.line3 {=
-    static char buf[17];
-    snprintf(buf, 17, "z: %.1f", gyro.z->value);
+    DisplayString buf;
+    snprintf(buf.text, 17, "z: %.1f", gyro.z->value);
     lf_set(display.line3, buf);
   =}
 }

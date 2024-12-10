@@ -10,16 +10,21 @@ target uC
 preamble {=
   #include <pico/stdlib.h>
   #include "display.h"
+
+  #define DISPLAY_STRING_LENGTH 32
+  typedef struct {
+    char text[DISPLAY_STRING_LENGTH];
+  } DisplayString;
 =}
 
 reactor Display {
   preamble {=
     static bool _pololu_robot_display_initialized = false;
   =}
-  input line0: char*  // inputs
-  input line1: char*
-  input line2: char*
-  input line3: char*
+  input line0: DisplayString
+  input line1: DisplayString
+  input line2: DisplayString
+  input line3: DisplayString
 
   // buffer update action
   reaction(startup) {=
@@ -37,22 +42,22 @@ reactor Display {
     if (lf_is_present(line0)) {
       // Clear the line.
       display_fill_rect(0, 0, DISPLAY_WIDTH, 16, 0);
-      display_text(line0->value, 0, 0, COLOR_WHITE);
+      display_text(line0->value.text, 0, 0, COLOR_WHITE);
     }
     if (lf_is_present(line1)) {
       // Clear the line.
       display_fill_rect(0, 16, DISPLAY_WIDTH, 16, 0);
-      display_text(line1->value, 0, 16, COLOR_WHITE);
+      display_text(line1->value.text, 0, 16, COLOR_WHITE);
     }
     if (lf_is_present(line2)) {
       // Clear the line.
       display_fill_rect(0, 32, DISPLAY_WIDTH, 16, 0);
-      display_text(line2->value, 0, 32, COLOR_WHITE);
+      display_text(line2->value.text, 0, 32, COLOR_WHITE);
     }
     if (lf_is_present(line3)) {
       // Clear the line.
       display_fill_rect(0, 48, DISPLAY_WIDTH, 16, 0);
-      display_text(line3->value, 0, 48, COLOR_WHITE);
+      display_text(line3->value.text, 0, 48, COLOR_WHITE);
     }
     // display buffer
     display_show();

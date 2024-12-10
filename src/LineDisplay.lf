@@ -13,13 +13,13 @@ target uC;
 import Line from "lib/Line.lf"
 import Display from "lib/Display.lf"
 
-main reactor(calibration_time: time = 10 s, sample_period: time = 100 ms) {
+main reactor {
   line = new Line()
   disp = new Display()
 
-  timer t(0, sample_period)
+  timer t(0, 100 msec)
   timer seconds(0, 1 s)  // Timer used to display seconds.
-  timer end_calibration(calibration_time)
+  timer end_calibration(10 s)
   state count: int = 0
 
   reaction(startup) -> disp.line0, disp.line1, disp.line2 {=
@@ -29,8 +29,8 @@ main reactor(calibration_time: time = 10 s, sample_period: time = 100 ms) {
   =}
 
   reaction(seconds) -> disp.line3 {=
-    static char buf[17];
-    snprintf(buf, 17, "time:%8d s", self->count++);
+    DisplayString buf;
+    snprintf(buf.text, 17, "time:%8d s", self->count++);
     lf_set(disp.line3, buf);
   =}
 
@@ -43,12 +43,12 @@ main reactor(calibration_time: time = 10 s, sample_period: time = 100 ms) {
   =}
 
   reaction(line.reflect) -> disp.line0, disp.line1, disp.line2 {=
-    static char buf0[17];
-    static char buf1[17];
-    static char buf2[17];
-    snprintf(buf0, 17, "0:%4d 1:%4d", line.reflect->value[0], line.reflect->value[1]);
-    snprintf(buf1, 17, "2:%4d 3:%4d", line.reflect->value[2], line.reflect->value[3]);
-    snprintf(buf2, 17, "4:%4d", line.reflect->value[4]);
+    DisplayString buf0;
+    DisplayString buf1;
+    DisplayString buf2;
+    snprintf(buf0.text, 17, "0:%4d 1:%4d", line.reflect->value.value[0], line.reflect->value.value[1]);
+    snprintf(buf1.text, 17, "2:%4d 3:%4d", line.reflect->value.value[2], line.reflect->value.value[3]);
+    snprintf(buf2.text, 17, "4:%4d", line.reflect->value.value[4]);
     lf_set(disp.line0, buf0);
     lf_set(disp.line1, buf1);
     lf_set(disp.line2, buf2);

@@ -87,7 +87,7 @@ reactor TrapezoidalIntegrator {
   reset state prev_time: instant_t = 0
 
   reaction(in) -> out {=
-    instant_t now = lf_time_logical();
+    instant_t now = env->get_logical_time(env);
     if (self->prev_time > SEC(0)) {
       float interval = ((now - self->prev_time) * 1e-9);
       self->s += (in->value + self->prev_in) * interval / 2;

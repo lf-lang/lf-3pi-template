@@ -5,32 +5,43 @@
 target uC;
 
 import Display from "lib/Display.lf"
+  
+preamble {=
+  typedef enum {
+    STOPPED,
+    DRIVING
+  } RobotState;
+=}
 
 reactor Robot {
-  input drive: bool      // Toggle mode.
-  output notify: string  // Notify of mode change.
+
+  input drive: bool             // Toggle mode.
+  output notify: DisplayString  // Notify of mode change.
+  state robot_state: RobotState 
 
   reaction(startup) -> notify {=
+    self->robot_state = STOPPED;
     lf_set(notify, "INIT");
   =}
 
-  initial mode STOPPED {
-    reaction(drive) -> reset(DRIVING), notify {=
-      if (drive->value) {
-        lf_set_mode(DRIVING);
-        lf_set(notify, "DRIVING");
-      }
-    =}
-  }
-
-  mode DRIVING {
-    reaction(drive) -> reset(STOPPED), notify {=
-      if (!drive->value) {
-        lf_set_mode(STOPPED);
-        lf_set(notify, "STOPPED");
-      }
-    =}
-  }
+  reaction(drive) -> notify {=
+    RobotState next_state = self->robot_state;
+    switch(self->robot_state) {
+      case STOPPED:
+        if (drive->value) {
+          next_state = DRIVING;
+          lf_set(notify, "DRIVING");
+        }
+        break;
+      case DRIVING:
+        if (!drive->value) {
+          next_state = STOPPED;
+          lf_set(notify, "STOPPED");
+        }
+        break;
+    }
+    self->robot_state = next_state;
+  =}
 }
 
 main reactor {
