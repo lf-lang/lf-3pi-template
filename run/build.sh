@@ -39,9 +39,15 @@ LF_MAIN_NAME=$(basename ${LF_MAIN} .lf)
 SRC_DIR=$(dirname ${LF_MAIN})
 SRC_GEN_PATH=$(echo ${SRC_DIR} | sed "s/src/src-gen/")
 
+LFC_COMMAND=${REACTOR_UC_PATH}/lfc/bin/lfc-dev ${LF_MAIN}
+echo "Running LFC command: ${LFC_COMMAND}"
+${LFC_COMMAND}
 
-echo "Generating source files for ${LF_MAIN_NAME} into ${SRC_GEN_PATH}"
+CMAKE_CONFIGURE_COMMAND="cmake -Bbuild -DLF_SRC_GEN_PATH=${SRC_GEN_PATH} -DLF_MAIN_NAME=${LF_MAIN_NAME}"
+echo "Running CMake configure command: ${CMAKE_CONFIGURE_COMMAND}"
+${CMAKE_CONFIGURE_COMMAND}
 
-${REACTOR_UC_PATH}/lfc/bin/lfc-dev ${LF_MAIN}
+CMAKE_BUILD_COMMAND="cmake --build build --parallel $(nproc)"
+echo "Running CMake build command: ${CMAKE_BUILD_COMMAND}"
+${CMAKE_BUILD_COMMAND}
 
-cmake -Bbuild -DLF_SRC_GEN_PATH=${SRC_GEN_PATH} -DLF_MAIN_NAME=${LF_MAIN_NAME}

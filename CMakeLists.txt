@@ -1,18 +1,10 @@
 cmake_minimum_required(VERSION 3.20.0)
+include(${CMAKE_CURRENT_SOURCE_DIR}/pico-sdk/pico_sdk_init.cmake)
+project(reactor-uc-3pi)
 
-set(LF_MAIN_NAME "" CACHE STRING "Name of the LF application")
-set(LF_SRC_GEN_PATH "" CACHE STRING "Name of the LF application")
+set(LF_MAIN_NAME "Blink" CACHE STRING "Name of the LF application")
+set(LF_SRC_GEN_PATH "src-gen" CACHE STRING "Name of the LF application")
 set(PLATFORM "PICO" CACHE STRING "Platform to target")
-
-# Verify that the environment is correctly set up.
-if (DEFINED ENV{PICO_SDK_PATH})
-  include("$ENV{PICO_SDK_PATH}/pico_sdk_init.cmake")
-else()
-  message(FATAL_ERROR "PICO_SDK_PATH environment variable not set")
-endif()
-
-include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
-project(reactor-uc-pico)
 
 pico_sdk_init()
 

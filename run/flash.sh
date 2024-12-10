@@ -32,4 +32,6 @@ fi
 LF_MAIN_NAME=$(basename ${LF_MAIN} .lf)
 
 # Run picotool with the specified main file
-picotool load -x build/${LF_MAIN_NAME}.elf
+FLASH_COMMAND="picotool flash -x build/${LF_MAIN_NAME}.elf"
+echo "Running picotool flash command: ${FLASH_COMMAND}"
+${FLASH_COMMAND}
