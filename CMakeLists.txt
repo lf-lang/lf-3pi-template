@@ -19,7 +19,7 @@ pico_sdk_init()
 # Build the generated C code.
 include(${LF_SRC_GEN_PATH}/${LF_MAIN_NAME}/CMakeLists.txt)
 add_subdirectory(${REACTOR_UC_PATH})
-add_executable(${LF_MAIN_NAME} main.c ${LFC_GEN_SOURCES})
+add_executable(${LF_MAIN_NAME} ${LFC_GEN_MAIN} ${LFC_GEN_SOURCES})
 target_include_directories(${LF_MAIN_NAME} PRIVATE ${LFC_GEN_INCLUDE_DIRS})
 target_link_libraries(${LF_MAIN_NAME} PRIVATE reactor-uc)
 target_link_libraries(${LF_MAIN_NAME} PUBLIC pico_stdlib pico_sync)
