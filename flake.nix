@@ -1,7 +1,7 @@
 {
   description = "lf-pico dev env";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.05";
+    nixpkgs.url = "nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
     # lingo
     # lf binaries
