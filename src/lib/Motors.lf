@@ -18,6 +18,7 @@ target C {
 
 preamble {=
   #include <motors.h>
+  #include <math.h>
 =}
 
 reactor Motors {
