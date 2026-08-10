@@ -12,8 +12,7 @@ target C {
   single-threaded: true
 }
 
-import Display from "lib/Display.lf"
-import Encoders from "lib/Encoders.lf"
+import Display, Encoders from <pololu-pi-c>
 
 main reactor {
   display = new Display()

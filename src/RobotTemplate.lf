@@ -10,7 +10,7 @@ target C {
   single-threaded: true
 }
 
-import Display from "lib/Display.lf"
+import Display from <pololu-pi-c>
 
 reactor Robot {
   input drive: bool      // Toggle mode.
