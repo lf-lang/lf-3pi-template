@@ -20,8 +20,8 @@ target C {
   single-threaded: true
 }
 
-import Accelerometer from <pololu-pi-c/IMU.lf>
-import Display from <pololu-pi-c/Display.lf>
+import Accelerometer from <pololu-3pi-c/IMU.lf>
+import Display from <pololu-3pi-c/Display.lf>
 
 main reactor {
   a = new Accelerometer()

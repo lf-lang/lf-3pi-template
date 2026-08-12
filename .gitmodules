@@ -1,6 +1,6 @@
 [submodule "pico-sdk"]
 	path = pico-sdk
 	url = https://github.com/raspberrypi/pico-sdk.git
-[submodule "lf-packages/pololu-pi-c"]
-	path = lf-packages/pololu-pi-c
+[submodule "lf-packages/pololu-3pi-c"]
+	path = lf-packages/pololu-3pi-c
 	url = https://github.com/lf-lang/pololu-3pi-c.git
