@@ -16,8 +16,7 @@ target C {
   single-threaded: true
 }
 
-import Line from "lib/Line.lf"
-import Display from "lib/Display.lf"
+import Line, Display from <pololu-3pi-c>
 
 main reactor(calibration_time: time = 10 s, sample_period: time = 100 ms) {
   line = new Line()

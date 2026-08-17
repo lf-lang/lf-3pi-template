@@ -10,9 +10,7 @@ target C {
   single-threaded: true
 }
 
-import Display from "../lib/Display.lf"
-import Encoders from "../lib/Encoders.lf"
-import MotorsWithFeedback from "../lib/MotorsWithFeedback.lf"
+import Display, Encoders, MotorsWithFeedback from <pololu-3pi-c>
 
 preamble {=
   // sprintf

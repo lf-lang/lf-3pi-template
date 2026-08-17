@@ -15,8 +15,7 @@ target C {
   single-threaded: true
 }
 
-import Display from "lib/Display.lf"
-import GyroAngle from "lib/IMU.lf"
+import Display, GyroAngle from <pololu-3pi-c>
 
 main reactor {
   display = new Display()

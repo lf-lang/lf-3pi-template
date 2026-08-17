@@ -4,7 +4,7 @@ target C {
   single-threaded: true
 }
 
-import Motors from "../lib/Motors.lf"
+import Motors from <pololu-3pi-c>
 
 main reactor {
   timer t(0, 2 s)
