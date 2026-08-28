@@ -5,6 +5,7 @@ let
 in 
 pkgs.mkShell {
   packages = with pkgs; [
+    lolcat
     picotool
     cmake
     gcc-arm-embedded
@@ -21,6 +22,9 @@ pkgs.mkShell {
     # lingo
   ];
 
+  PICO_BOARD = "pololu_3pi_2040_robot";
+  PICO_PLATFORM = "";  # intentionally empty valued, allowing board header to set it
+
   # TODO: integrate dependencies into nix
   shellHook = ''
     echo "[shell] hook start"
@@ -29,14 +33,17 @@ pkgs.mkShell {
     cd pico-sdk/
     git submodule update --init
     export PICO_SDK_PATH="$PWD"
+    echo "[shell] PICO_SDK_PATH: $PICO_SDK_PATH" | lolcat
     cd ../
-    echo "[shell] copy robot header"
-    # FIXME: Is this needed?
-    cp robot-lib/pololu_3pi_2040_robot.h pico-sdk/src/boards/include/boards/
+    export PICO_BOARD_HEADER_DIRS="$PWD/robot-lib"
+    echo "[shell] PICO_BOARD: $PICO_BOARD" | lolcat
+    echo "[shell] PICO_PLATFORM: $PICO_PLATFORM" | lolcat
+    echo "[shell] PICO_BOARD_HEADER_DIRS: $PICO_BOARD_HEADER_DIRS" | lolcat
     echo "[shell] setup testbed"
     cd test/
     npm install
-    echo "[shell] hook end"
     cd ../
+    echo '[shell] To exit the shell, type `exit` or press `Ctrl`+`D`'
+    echo "[shell] hook end"
     '';
 }
