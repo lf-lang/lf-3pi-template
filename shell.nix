@@ -31,8 +31,6 @@ pkgs.mkShell {
     export PICO_SDK_PATH="$PWD"
     cd ../
     echo "[shell] copy robot header"
-    # FIXME: Is this needed?
-    cp robot-lib/pololu_3pi_2040_robot.h pico-sdk/src/boards/include/boards/
     echo "[shell] setup testbed"
     cd test/
     npm install
